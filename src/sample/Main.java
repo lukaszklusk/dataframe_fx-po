@@ -194,7 +194,6 @@ public class Main extends Application {
                             if (it[0] == width) {
                                 try {
                                     dtf[0] = new DataFrame(filepath.getText(), ct, true); //wczytywanie dataframe
-                                    dtf[0].print();
                                 } catch (IOException e1) {
                                     GridPane errorGrid = new GridPane();
                                     errorGrid.setAlignment(Pos.CENTER);
@@ -466,13 +465,42 @@ public class Main extends Application {
                     queryGrid.setHgap(10);
                     queryGrid.setVgap(10);
                     queryGrid.setPadding(new Insets(25, 25, 25, 25));
-                    Scene queryScene = new Scene(queryGrid,350,100);
+                    Scene queryScene = new Scene(queryGrid,350,200);
 
                     Button queryBtn = new Button("OK");
                     HBox hbQBtn = new HBox(10);
                     hbQBtn.setAlignment(Pos.CENTER);
                     hbQBtn.getChildren().add(queryBtn);
                     queryGrid.add(hbQBtn, 0, 2);
+
+                    Label kolL = new Label("Wybierz kolumne:");
+                    queryGrid.add(kolL,0,0);
+
+                    ComboBox kol = new ComboBox();
+                    for(int i=0;i<dtf[0].cnames.length;i++){
+                        kol.getItems().add(dtf[0].cnames[i]);
+                    }
+                    queryGrid.add(kol,1,0);
+
+                    Label typeL = new Label("Wybierz zapytanie:");
+                    queryGrid.add(typeL,0,1);
+
+                    ComboBox type = new ComboBox();
+                    type.getItems().addAll(
+                            "min",
+                            "max",
+                            "sum",
+                            "mean",
+                            "std",
+                            "var"
+                    );
+                    queryGrid.add(type,1,1);
+
+                    Label wynL = new Label("Wynik:");
+                    queryGrid.add(wynL,0,3);
+
+                    Text wyn = new Text("0");
+                    queryGrid.add(wyn,1,3);
 
                     Stage queryWindow = new Stage();
                     queryWindow.setTitle("Zapytania");
@@ -488,7 +516,30 @@ public class Main extends Application {
                     queryBtn.setOnAction(new EventHandler<ActionEvent>() {
                         @Override
                         public void handle(ActionEvent actionEvent) {
-                            queryWindow.close();
+                            DataFrame dtw = dtf[0];
+                            if(type.getValue().toString() == "min"){
+                                dtw = dtf[0].groupby().min();
+                            }
+                            if(type.getValue().toString() == "max"){
+                                dtw = dtf[0].groupby().max();
+                            }
+                            if(type.getValue().toString() == "mean"){
+                                dtw = dtf[0].groupby().mean();
+                            }
+                            if(type.getValue().toString() == "var"){
+                                dtw = dtf[0].groupby().var();
+                            }
+                            if(type.getValue().toString() == "std"){
+                                dtw = dtf[0].groupby().std();
+                            }
+                            if(type.getValue().toString() == "sum"){
+                                dtw = dtf[0].groupby().sum();
+                            }
+                            for(int i=0;i<dtw.cnames.length;i++){
+                                if(dtw.cnames[i] == kol.getValue().toString()){
+                                    wyn.setText(dtw.colms[i].col.get(0).toString());
+                                }
+                            }
                         }
                     });
                 }else{
